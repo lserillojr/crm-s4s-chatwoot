@@ -32,4 +32,8 @@ RUN sed -i 's/omniauth_providers: \[:google_oauth2, :saml\]/omniauth_providers: 
 # 3) Initializer OIDC espelhando o provider :google_oauth2 nativo (lido por env vars em runtime).
 COPY patches/omniauth_openid_connect.rb config/initializers/omniauth_openid_connect.rb
 
+# 4) Override do session_store: cookie -> Redis (server-side). Evita CookieOverflow no callback OIDC
+#    (id_token+userinfo do Keycloak nao cabem nos 4KB do cookie). Sobrescreve o arquivo nativo.
+COPY patches/session_store.rb config/initializers/session_store.rb
+
 # Sem callback controller / sem patch de routes: omniauth_success ja e provider-agnostico.
