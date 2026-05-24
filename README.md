@@ -12,7 +12,11 @@ O Chatwoot v4.13 Community **não** traz a gem `omniauth_openid_connect` (só `o
 2. Acrescenta `:openid_connect` à allowlist `omniauth_providers` do model `User` (via `sed`, com verificação que falha o build se o padrão não casar).
 3. Copia um initializer que registra `provider :openid_connect` espelhando o `provider :google_oauth2` nativo.
 
-**Não há callback controller custom:** o `DeviseOverrides::OmniauthCallbacksController#omniauth_success` já é provider-agnóstico (find-by-email → `sign_in` com `sso_auth_token`; senão `AccountBuilder` cria conta+user).
+4. Override do `session_store` de cookie → **Redis** (`ActionDispatch::Session::CacheStore` + `RedisCacheStore` dedicada, namespace `cw:session`). Obrigatório: o callback OIDC guarda o id_token+userinfo na sessão e estoura o cookie de 4KB (`CookieOverflow` → 500). Usa o `REDIS_URL` que já existe no compose; sem gem nova.
+
+**Não há callback controller custom:** o `DeviseOverrides::OmniauthCallbacksController#omniauth_success` já é provider-agnóstico (find-by-email → `sign_in` com `sso_auth_token`; senão `AccountBuilder` cria conta+user — em produção o user do MEI deve ser **pré-criado** pelo provisionamento, mapeado pelo email do Keycloak, pra cair na conta certa).
+
+**Smoke E2E:** ✅ GO em 2026-05-24 (login Keycloak realm `s4s` → dashboard Chatwoot logado). Ver `crm-s4s-product/docs/_handoff/2026-05-24_chatwoot_oidc_poc_resultado.md`.
 
 ## Imagem
 
