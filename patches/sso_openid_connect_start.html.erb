@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Entrando…</title>
+  </head>
+  <body>
+    <%# Same-origin: o form carrega o authenticity_token da sessao do Chatwoot, %>
+    <%# entao o omniauth-rails_csrf_protection aceita o request phase (POST). %>
+    <form id="sso-form" method="post" action="/omniauth/openid_connect">
+      <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>" />
+      <noscript>
+        <p>Clique para entrar no seu atendimento:</p>
+        <button type="submit">Entrar com S4S</button>
+      </noscript>
+    </form>
+    <p>Entrando no seu atendimento…</p>
+    <script>
+      document.getElementById('sso-form').submit();
+    </script>
+  </body>
+</html>
