@@ -32,4 +32,5 @@ jobs:
           push: true
           tags: |
             ghcr.io/lserillojr/crm-s4s-chatwoot:v4.13.0
+            ghcr.io/lserillojr/crm-s4s-chatwoot:v4.13.0-sso2
             ghcr.io/lserillojr/crm-s4s-chatwoot:latest

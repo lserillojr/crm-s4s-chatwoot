@@ -36,4 +36,15 @@ COPY patches/omniauth_openid_connect.rb config/initializers/omniauth_openid_conn
 #    (id_token+userinfo do Keycloak nao cabem nos 4KB do cookie). Sobrescreve o arquivo nativo.
 COPY patches/session_store.rb config/initializers/session_store.rb
 
-# Sem callback controller / sem patch de routes: omniauth_success ja e provider-agnostico.
+# 5) Rota de iniciacao SSO same-origin (Plano E Fase 2). O Portal (web-simples) so
+#    linka pra GET /sso/openid_connect/start; o form com authenticity_token vive
+#    AQUI (same-origin) pra o omniauth-rails_csrf_protection aceitar o request phase.
+COPY patches/sso_openid_connect_controller.rb app/controllers/sso_openid_connect_controller.rb
+COPY patches/sso_openid_connect_start.html.erb app/views/sso_openid_connect/start.html.erb
+COPY patches/sso_openid_connect_routes.rb config/initializers/sso_openid_connect_routes.rb
+RUN test -f app/controllers/sso_openid_connect_controller.rb \
+ && test -f app/views/sso_openid_connect/start.html.erb \
+ && test -f config/initializers/sso_openid_connect_routes.rb \
+ || (echo "PATCH FALHOU: arquivos da rota SSO start ausentes" && exit 1)
+
+# Sem callback controller custom: omniauth_success ja e provider-agnostico.
