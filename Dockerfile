@@ -48,3 +48,13 @@ RUN test -f app/controllers/sso_openid_connect_controller.rb \
  || (echo "PATCH FALHOU: arquivos da rota SSO start ausentes" && exit 1)
 
 # Sem callback controller custom: omniauth_success ja e provider-agnostico.
+
+# 6) Modo embed S4S (Portal Unico): middleware gated por ?embed=s4s que seta o
+#    cookie s4s_embed, injeta o <script>/<link> de chrome-off no <head> das
+#    respostas HTML e libera frame-ancestors pro Portal (env S4S_PORTAL_ORIGIN).
+#    O CSS vai pra public/ e e servido como asset estatico (requer
+#    RAILS_SERVE_STATIC_FILES=true em runtime — checar na validacao manual).
+COPY patches/embed_s4s.rb config/initializers/embed_s4s.rb
+COPY patches/embed_s4s.css public/embed_s4s.css
+RUN test -f config/initializers/embed_s4s.rb && test -f public/embed_s4s.css \
+ || (echo "PATCH FALHOU: arquivos do modo embed S4S ausentes" && exit 1)
