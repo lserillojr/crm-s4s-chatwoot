@@ -1,27 +1,20 @@
 /* Modo embed S4S — chrome-off do Chatwoot.
  *
  * Aplicado só quando o middleware (config/initializers/embed_s4s.rb) marcou
- * <html class="s4s-embed"> a partir do cookie s4s_embed=1. Esconde o chrome
- * (navegação primária à esquerda + topo) pra o Chatwoot caber "limpo" no iframe
- * do Portal Único.
+ * <html class="s4s-embed"> a partir do cookie s4s_embed=1. Esconde a navegação
+ * primária pra o Chatwoot caber "limpo" no iframe do Portal Único.
  *
- * ⚠️ SPIKE — os seletores abaixo são o PONTO DE PARTIDA documentado no plano.
- * CONFIRMAR no DevTools rodando a imagem (Task A1 Step 1) e ajustar:
- *   - sidebar primária (coluna de ícones à esquerda): no Chatwoot v4.13 a SPA Vue
- *     usa `.app-sidebar` / `.sidebar`. Confirmar a classe real do contêiner raiz.
- *   - NÃO esconder o header DA CONVERSA (nome do contato/ações) — só o chrome
- *     global de navegação. Se houver um topbar global separado, adicionar aqui.
- * Depois de confirmado, remover este aviso e deixar só os seletores reais.
+ * Seletor confirmado ao vivo no v4.13 (DevTools + Playwright, DEV 2026-05-31):
+ * a SPA Vue do Chatwoot v4 NÃO usa classe semântica estável (`.app-sidebar`/
+ * `.sidebar` não existem) — a sidebar primária é um <aside> (w-200, irmão do
+ * <main>), com classes Tailwind voláteis. Ancoramos no <aside> que NÃO está
+ * dentro do <main>: isso pega a navegação primária e preserva um eventual
+ * painel de contato (que vive dentro do <main> na tela de conversa).
+ *
+ * O layout é flexbox (o <main> é flex-1 com margin/padding 0), então esconder
+ * o <aside> já faz o conteúdo ocupar a largura toda — sem reset de margem.
  */
 
-html.s4s-embed .app-sidebar,
-html.s4s-embed .sidebar {
+html.s4s-embed aside:not(main aside) {
   display: none !important;
-}
-
-/* Reclama o espaço que a sidebar deixou (a área de conteúdo costuma ter
- * margin-left reservada pro chrome). Confirmar o seletor do container de conteúdo. */
-html.s4s-embed .app-content,
-html.s4s-embed .app-wrapper {
-  margin-left: 0 !important;
 }
