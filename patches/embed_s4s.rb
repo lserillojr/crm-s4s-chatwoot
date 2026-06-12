@@ -31,9 +31,23 @@
 class S4sEmbedMiddleware
   # Snippet injetado antes de </head>. O <script> roda síncrono (antes do paint)
   # e marca a classe a partir do cookie; o <link> render-blocking aplica o CSS.
+  #
+  # O script também NEUTRALIZA o título da aba: a stack de base é invisível ao MEI,
+  # mas o Chatwoot grava "… - Chatwoot" em document.title. Quando o MEI abre o
+  # atendimento numa aba standalone (atalho SSO do onboarding), esse título VAZA na
+  # aba do navegador. Removemos "Chatwoot" do título e seguimos as trocas que a SPA
+  # Vue faz ao navegar (MutationObserver no <title>, com guarda anti-loop). Fallback
+  # "Meu atendimento".
   HEAD_SNIPPET =
     '<script>if(document.cookie.indexOf("s4s_embed=1")>-1){' \
-    'document.documentElement.classList.add("s4s-embed")}</script>' \
+    'document.documentElement.classList.add("s4s-embed");' \
+    '(function(){function c(){var t=document.title||"";' \
+    'var n=t.replace(/\s*[-|]\s*Chatwoot\b/gi,"").replace(/^\s*Chatwoot\b\s*[-|]?\s*/i,"")' \
+    '.replace(/\s{2,}/g," ").trim();if(!n){n="Meu atendimento"}' \
+    'if(n!==t){document.title=n}}function w(){c();var e=document.querySelector("title");' \
+    'if(e&&window.MutationObserver){new MutationObserver(c).observe(e,{childList:true})}}' \
+    'if(document.querySelector("title")){w()}else{document.addEventListener("DOMContentLoaded",w)}' \
+    '})()}</script>' \
     '<link rel="stylesheet" href="/embed_s4s.css">'
 
   def initialize(app)
